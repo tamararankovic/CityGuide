@@ -1,0 +1,10 @@
+package rules
+
+import com.sample.model.User
+
+rule "Your First Rule"
+    when
+		User()
+    then
+        System.out.println("woohoo");
+end
