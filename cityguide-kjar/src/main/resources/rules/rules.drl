@@ -6,5 +6,5 @@ rule "Your First Rule"
     when
 		User()
     then
-        System.out.println("woohoo");
+        System.out.println("user found");
 end

@@ -1,0 +1,98 @@
+package rules
+
+import com.sample.model.*;
+import java.util.List;
+
+declare enum PopularityType
+   POPULAR, UNPOPULAR, INDETERMINABLE;
+end
+
+declare trait Popularity
+	id : long
+	type : PopularityType
+end
+
+query hasPercentageOfPositiveRatingsInRange(Integer $locationId, Integer $minPercentage, Integer $maxPercentage)
+	$l : Location($locationId == id)
+	$ratings : List(size > 0) from collect(Rating(location.id == $l.id))
+	Number(intValue / $ratings.size * 100 >= $minPercentage, intValue / $ratings.size * 100 <= $maxPercentage)
+	from accumulate(Rating($rating:this, type == RatingType.LIKE) from $ratings, count($rating))
+end
+
+rule "location popular if it has more than 80% of positive ratings"
+	when
+		$l : Location($locationId : id)
+		not Popularity(id == $locationId)
+		hasPercentageOfPositiveRatingsInRange($locationId, 80, 100;)
+	then
+		System.out.println("Location is popular");
+		Popularity p = don($l, Popularity.class);
+		p.setType(PopularityType.POPULAR);
+end
+
+rule "location unpopular if it has less than 20% of positive ratings"
+	when
+		$l : Location($locationId : id)
+		not Popularity(id == $locationId)
+		hasPercentageOfPositiveRatingsInRange($locationId, 0, 20;)
+	then
+		System.out.println("Location is unpopular");
+		Popularity p = don($l, Popularity.class);
+		p.setType(PopularityType.UNPOPULAR);
+end
+
+rule "location popular if it has more than 70% of positive ratings and rating count above average"
+	when
+		$l : Location($locationId : id)
+		not Popularity(id == $locationId)
+		$avgRatings : Number() from accumulate(
+								Location($id : id) and
+								$ratings : List() from collect (Rating(location.id == $id)),
+								average($ratings.size())
+							)
+		List(size > $avgRatings) from collect(Rating(location.id == $locationId))
+		hasPercentageOfPositiveRatingsInRange($locationId, 70, 100;)
+	then
+		System.out.println("Location is popular");
+		Popularity p = don($l, Popularity.class);
+		p.setType(PopularityType.POPULAR);
+end
+
+rule "location unpopular if it has less than 30% of positive ratings and rating count above average"
+	when
+		$l : Location($locationId : id)
+		not Popularity(id == $locationId)
+		$avgRatings : Number() from accumulate(
+								Location($id : id) and
+								$ratings : List() from collect (Rating(location.id == $id)),
+								average($ratings.size())
+							)
+		List(size > $avgRatings) from collect(Rating(location.id == $locationId))
+		hasPercentageOfPositiveRatingsInRange($locationId, 0, 30;)
+	then
+		System.out.println("Location is unpopular");
+		Popularity p = don($l, Popularity.class);
+		p.setType(PopularityType.UNPOPULAR);
+end
+
+rule "location's popularity is indeterminable if it has no ratings"
+	when
+		$l : Location($locationId : id)
+		not Popularity(id == $locationId)
+		not Rating(location.id == $locationId)
+	then
+		System.out.println("Location's popularity is indeterminable");
+		Popularity p = don($l, Popularity.class);
+		p.setType(PopularityType.INDETERMINABLE);
+end
+
+rule "location's popularity is indeterminable if no other rule has been activated"
+salience -1
+	when
+		$l : Location($locationId : id)
+		not Popularity(id == $locationId)
+	then
+		System.out.println("Location's popularity is indeterminable");
+		Popularity p = don($l, Popularity.class);
+		p.setType(PopularityType.INDETERMINABLE);
+end
