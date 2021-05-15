@@ -49,4 +49,9 @@ public class Rating {
 	public RatingType getType() {
 		return type;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return id == ((Rating)obj).id;
+	}
 }

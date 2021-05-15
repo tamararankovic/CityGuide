@@ -33,6 +33,8 @@ public class TripPlanRequest {
 	joinColumns = @JoinColumn(name = "trip_request_id", referencedColumnName = "id"), 
 	inverseJoinColumns = @JoinColumn(name = "location_type_id", referencedColumnName = "id"))
 	private Set<LocationType> preferredTypes;
+	
+	@Column(name = "tripDurationInDays", nullable = false)
 	private int tripDurationInDays;
 	
 	public TripPlanRequest() {

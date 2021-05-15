@@ -1,0 +1,67 @@
+package sbnz.app;
+
+import sbnz.app.model.Feature;
+import sbnz.app.model.TripPlanRequest;
+import sbnz.app.model.LocationType;
+
+declare enum Priority
+   HIGH, REGULAR, LOW, NONE;
+end
+
+declare FeaturePriority
+	requestId: long
+	feature: Feature
+	priority: Priority
+end
+
+query featurePresentInLocationTypesMoreThan(Feature $feature, TripPlanRequest $tpr, int $percentage)
+	List(size / $tpr.preferredTypes.size() * 100 > $percentage) from collect(
+													LocationType($feature memberOf features) 
+													from $tpr.preferredTypes)
+end
+
+rule "Feature has high priority"
+salience 3
+	when
+		$tpr : TripPlanRequest($requestId : id)
+		$feature: Feature() from Feature.values() 
+		not FeaturePriority(requestId == $requestId, feature == $feature)
+		featurePresentInLocationTypesMoreThan($feature, $tpr, 70;)
+	then
+		System.out.println("Feature " + $feature + " has high priority");
+		insert(new FeaturePriority($tpr.getId(), $feature, Priority.HIGH));
+end
+		
+rule "Feature has regular priority"
+salience 2
+	when
+		$tpr : TripPlanRequest($requestId : id)
+		$feature: Feature() from Feature.values() 
+		not FeaturePriority(requestId == $requestId, feature == $feature)
+		featurePresentInLocationTypesMoreThan($feature, $tpr, 50;)
+	then
+		System.out.println("Feature " + $feature + " has regular priority");
+		insert(new FeaturePriority($tpr.getId(), $feature, Priority.REGULAR));
+end
+
+rule "Feature has low priority"
+salience 1
+	when
+		$tpr : TripPlanRequest($requestId : id)
+		$feature: Feature() from Feature.values() 
+		not FeaturePriority(requestId == $requestId, feature == $feature)
+		featurePresentInLocationTypesMoreThan($feature, $tpr, 30;)
+	then
+		System.out.println("Feature " + $feature + " has low priority");
+		insert(new FeaturePriority($tpr.getId(), $feature, Priority.LOW));
+end
+
+rule "Feature has no priority"
+	when
+		$tpr : TripPlanRequest($requestId : id)
+		$feature: Feature() from Feature.values() 
+		not FeaturePriority(requestId == $requestId, feature == $feature)
+	then
+		System.out.println("Feature " + $feature + " has no priority");
+		insert(new FeaturePriority($tpr.getId(), $feature, Priority.NONE));
+end
