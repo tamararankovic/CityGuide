@@ -1,7 +1,7 @@
 package sbnz.app.fact.event;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -33,17 +33,17 @@ public class RatingCreated implements Serializable {
 	private Rating rating;
 	
 	@Column(name = "created", nullable = false)
-	private LocalDateTime created;
+	private Date created;
 	
 	@Column(name = "typeAtCreationTime", nullable = false)
 	private RatingType typeAtCreationTime;
 
 	public RatingCreated() {
 		super();
-		created = LocalDateTime.now();
+		created = new Date();
 	}
 
-	public RatingCreated(Rating rating, LocalDateTime created, RatingType typeAtCreationTime) {
+	public RatingCreated(Rating rating, Date created, RatingType typeAtCreationTime) {
 		super();
 		this.rating = rating;
 		this.created = created;
@@ -56,10 +56,10 @@ public class RatingCreated implements Serializable {
 	public void setRating(Rating rating) {
 		this.rating = rating;
 	}
-	public LocalDateTime getCreated() {
+	public Date getCreated() {
 		return created;
 	}
-	public void setCreated(LocalDateTime created) {
+	public void setCreated(Date created) {
 		this.created = created;
 	}
 	public RatingType getTypeAtCreationTime() {

@@ -24,7 +24,7 @@ rule "Feature has high priority"
 salience 3
 	when
 		$tpr : TripPlanRequest($requestId : id)
-		$feature: Feature() from Feature.values() 
+		$feature: Feature()
 		not FeaturePriority(requestId == $requestId, feature == $feature)
 		featurePresentInLocationTypesMoreThan($feature, $tpr, 70;)
 	then
@@ -36,7 +36,7 @@ rule "Feature has regular priority"
 salience 2
 	when
 		$tpr : TripPlanRequest($requestId : id)
-		$feature: Feature() from Feature.values() 
+		$feature: Feature()
 		not FeaturePriority(requestId == $requestId, feature == $feature)
 		featurePresentInLocationTypesMoreThan($feature, $tpr, 50;)
 	then
@@ -48,7 +48,7 @@ rule "Feature has low priority"
 salience 1
 	when
 		$tpr : TripPlanRequest($requestId : id)
-		$feature: Feature() from Feature.values() 
+		$feature: Feature()
 		not FeaturePriority(requestId == $requestId, feature == $feature)
 		featurePresentInLocationTypesMoreThan($feature, $tpr, 30;)
 	then
@@ -59,9 +59,18 @@ end
 rule "Feature has no priority"
 	when
 		$tpr : TripPlanRequest($requestId : id)
-		$feature: Feature() from Feature.values() 
+		$feature: Feature()
 		not FeaturePriority(requestId == $requestId, feature == $feature)
 	then
 		System.out.println("Feature " + $feature + " has no priority");
 		insert(new FeaturePriority($tpr.getId(), $feature, Priority.NONE));
+end
+
+rule "Set focus on the location-type-score agenda group"
+	when
+		forall($feature : Feature()
+			   FeaturePriority(feature == $feature))
+	then
+		System.out.println("Setting focus on the location-type-score agenda group");
+		kcontext.getKnowledgeRuntime().getAgenda().getAgendaGroup("location-type-score").setFocus();
 end

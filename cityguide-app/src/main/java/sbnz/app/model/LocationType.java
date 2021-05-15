@@ -45,4 +45,9 @@ public class LocationType {
 	public Set<Feature> getFeatures() {
 		return features;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return id == ((LocationType)obj).id;
+	}
 }

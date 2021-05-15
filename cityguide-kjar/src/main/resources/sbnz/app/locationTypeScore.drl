@@ -1,1 +1,126 @@
 package sbnz.app;
+
+import sbnz.app.model.*;
+import sbnz.app.fact.event.RatingCreated;
+
+declare LocationTypeScore
+	requestId: long
+	typeId: long
+	score: double
+end
+
+rule "1 point for selected location types"
+agenda-group "location-type-score"
+	when
+		$lt : LocationType($typeId : id)
+		$tpr : TripPlanRequest($requestId : id, preferredTypes contains $lt)
+		not LocationTypeScore($typeId == typeId, $requestId == requestId)
+	then
+		System.out.println("Location type with name " + $lt.getName() + " and features " + $lt.getFeatures() + " got 1 point");
+		insert(new LocationTypeScore($requestId, $typeId, 1.0));
+end
+
+rule "0.8 points for location types eligible for 0.7 and at least 3 likes and 0 dislikes for type in the past 6 months"
+extends "0.7 points for location types that only have features with high priority"
+agenda-group "location-type-score"
+	when
+		$likes : List(size >= 3) from collect(
+						RatingCreated($tpr.user.id == rating.user.id, 
+									  $typeId == rating.location.type.id, 
+									  typeAtCreationTime == RatingType.LIKE)
+						over window:time(6m))
+		$dislikes : List(size == 0) from collect(
+						RatingCreated($tpr.user.id == rating.user.id, 
+									  $typeId == rating.location.type.id, 
+									  typeAtCreationTime == RatingType.DISLIKE)
+						over window:time(6m))
+	then
+		System.out.println("Location type with name " + $lt.getName() + " and features " + $lt.getFeatures() + " got 0.8 points");
+		insert(new LocationTypeScore($requestId, $typeId, 0.8));
+end
+
+rule "0.7 points for location types that only have features with high priority"
+agenda-group "location-type-score"
+	when
+		$lt : LocationType($typeId : id)
+		$tpr : TripPlanRequest($requestId : id)
+		not LocationTypeScore($typeId == typeId, $requestId == requestId)
+		forall($feature : Feature(this memberOf $lt.features)
+				FeaturePriority($feature == feature, $requestId == requestId, priority == Priority.HIGH))
+	then
+		System.out.println("Location type with name " + $lt.getName() + " and features " + $lt.getFeatures() + " got 0.7 points");
+		insert(new LocationTypeScore($requestId, $typeId, 0.7));
+end
+
+rule "0.6 points for location types eligible for 0.5 and at least 3 likes and 0 dislikes for type in the past 6 months"
+extends "0.5 points for location types that only have features with high or regular priority"
+agenda-group "location-type-score"
+	when
+		$likes : List(size >= 3) from collect(
+						RatingCreated($tpr.user.id == rating.user.id, 
+									  $typeId == rating.location.type.id, 
+									  typeAtCreationTime == RatingType.LIKE)
+						over window:time(6m))
+		$dislikes : List(size == 0) from collect(
+						RatingCreated($tpr.user.id == rating.user.id, 
+									  $typeId == rating.location.type.id, 
+									  typeAtCreationTime == RatingType.DISLIKE)
+						over window:time(6m))
+	then
+		System.out.println("Location type with name " + $lt.getName() + " and features " + $lt.getFeatures() + " got 0.6 points");
+		insert(new LocationTypeScore($requestId, $typeId, 0.6));
+end
+
+rule "0.5 points for location types that only have features with high or regular priority"
+agenda-group "location-type-score"
+	when
+		$lt : LocationType($typeId : id)
+		$tpr : TripPlanRequest($requestId : id)
+		not LocationTypeScore($typeId == typeId, $requestId == requestId)
+		forall($feature : Feature(this memberOf $lt.features)
+				FeaturePriority($feature == feature && $requestId == requestId && (priority == Priority.HIGH || priority == Priority.REGULAR)))
+	then
+		System.out.println("Location type with name " + $lt.getName() + " and features " + $lt.getFeatures() + " got 0.5 points");
+		insert(new LocationTypeScore($requestId, $typeId, 0.5));
+end
+
+rule "0.3 points for location types that have no features with no priority"
+agenda-group "location-type-score"
+	when
+		$lt : LocationType($typeId : id)
+		$tpr : TripPlanRequest($requestId : id)
+		not LocationTypeScore($typeId == typeId, $requestId == requestId)
+		forall($feature : Feature(this memberOf $lt.features)
+				FeaturePriority($feature == feature, $requestId == requestId, priority != Priority.NONE))
+	then
+		System.out.println("Location type with name " + $lt.getName() + " and features " + $lt.getFeatures() + " got 0.3 points");
+		insert(new LocationTypeScore($requestId, $typeId, 0.3));
+end
+
+rule "0.2 points for location types that have one feature with no priority, but all the others with high priority"
+agenda-group "location-type-score"
+	when
+		$lt : LocationType($typeId : id)
+		$tpr : TripPlanRequest($requestId : id)
+		not LocationTypeScore($typeId == typeId, $requestId == requestId)
+		$nonePriorityFeatures : List(size == 1) from accumulate(
+											FeaturePriority($f : feature, $requestId == requestId, priority == Priority.NONE)
+											and Feature(this == $f) from $lt.features, 
+											collectList($f))
+		forall($feature : Feature(this memberOf $lt.features, this not memberOf $nonePriorityFeatures)
+				FeaturePriority($feature == feature, $requestId == requestId, priority == Priority.HIGH))
+	then
+		System.out.println("Location type with name " + $lt.getName() + " and features " + $lt.getFeatures() + " got 0.2 points");
+		insert(new LocationTypeScore($requestId, $typeId, 0.2));
+end
+
+rule "0 points for remaining location types"
+agenda-group "location-type-score"
+	when
+		$lt : LocationType($typeId : id)
+		$tpr : TripPlanRequest($requestId : id)
+		not LocationTypeScore($typeId == typeId, $requestId == requestId)
+	then
+		System.out.println("Location type with name " + $lt.getName() + " and features " + $lt.getFeatures() + " got 0 points");
+		insert(new LocationTypeScore($requestId, $typeId, 0.0));
+end
