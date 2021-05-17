@@ -15,7 +15,7 @@ public class Constants {
 	
 	//similar user
 	public static final double JACCARD_INDEX_MIN = 0.5;
-	public static final double MIN_PERCENT_OF_SAME_TYPE_RATINGS = 70.0;
+	public static final double MIN_PERCENT_OF_SAME_TYPE_RATINGS = 50.0;
 	
 	//time spent at location
 	public static final int MIN_RANDOM_TIME_IN_MINUTES = 10;
