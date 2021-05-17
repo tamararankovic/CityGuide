@@ -1,8 +1,9 @@
 package sbnz.app.controller;
 
-import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.kie.api.runtime.KieContainer;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import sbnz.app.fact.event.RatingCreated;
 import sbnz.app.model.Feature;
 import sbnz.app.model.Location;
 import sbnz.app.model.LocationType;
@@ -44,42 +44,48 @@ public class SampleController {
 	@RequestMapping(value = "/item", method = RequestMethod.GET)
 	public void getQuestions() {
 		KieSession kieSession = kieContainer.newKieSession("session");
+		
 		List<User> users = repo.findAll();
-		for(User u : users) {
-			kieSession.insert(u);
+		Set<Feature> featuresGallery = new HashSet<Feature>();
+		featuresGallery.add(Feature.ART);
+		Set<Feature> featuresCinema = new HashSet<Feature>(featuresGallery);
+		featuresCinema.add(Feature.FOOD_AND_DRINK);
+		User u = new User();
+		LocationType typeGallery = new LocationType(0, "gallery", featuresGallery);
+		LocationType typeCinema = new LocationType(1, "cinema", featuresCinema);
+		Location locationGallery = new Location(0, typeGallery, "gallery", "", "", "");
+		Location locationCinema = new Location(1, typeCinema, "cinema", "", "", "");
+		Set<LocationType> types = new HashSet<LocationType>();
+		types.add(typeGallery);
+		TripPlanRequest plan = new TripPlanRequest(0, u, null, types, 2);
+		Rating ratingCinema = new Rating(0, u, locationCinema, RatingType.LIKE);
+		
+		kieSession.insert(typeGallery);
+		kieSession.insert(typeCinema);
+		kieSession.insert(locationGallery);
+		kieSession.insert(locationCinema);
+		kieSession.insert(plan);
+		kieSession.insert(ratingCinema);
+		for(User user : users) {
+			kieSession.insert(user);
+			kieSession.insert(new Rating(0, user, locationCinema, RatingType.LIKE));
 		}
 		for(Feature f : Feature.values()) {
 			kieSession.insert(f);
 		}
-		Set<Feature> f = new HashSet<Feature>();
-		f.add(Feature.ART);
-		Set<Feature> f2 = new HashSet<Feature>(f);
-		f2.add(Feature.FOOD_AND_DRINK);
-		User u = new User();
-		LocationType lt = new LocationType(0, "gallery", f);
-		LocationType lt2 = new LocationType(1, "cinema", f2);
-		Location l = new Location(0, lt, "", "", "", "");
-		Location l2 = new Location(1, lt2, "", "", "", "");
-		Set<LocationType> types = new HashSet<LocationType>();
-		types.add(lt);
-		TripPlanRequest tpr = new TripPlanRequest(0, u, null, types, 2);
 		
-		Rating r = new Rating(0, u, l2, RatingType.LIKE);
+		kieSession.setGlobal("recommendedLocations", new HashMap<Location, Double>());
 		
-		RatingCreated rc1 = new RatingCreated(r, new Date(), RatingType.LIKE);
-		RatingCreated rc2 = new RatingCreated(r, new Date(), RatingType.LIKE);
-		RatingCreated rc3 = new RatingCreated(r, new Date(), RatingType.LIKE);
-		
-		kieSession.insert(lt);
-		kieSession.insert(lt2);
-		kieSession.insert(l);
-		kieSession.insert(tpr);
-		kieSession.insert(r);
-		kieSession.insert(rc1);
-		kieSession.insert(rc2);
-		kieSession.insert(rc3);
-		System.out.println(kieSession.getFactCount());   
 		kieSession.fireAllRules();
+		
+		@SuppressWarnings("unchecked")
+		Map<Location, Double> recommendedLocations = (Map<Location, Double>) kieSession.getGlobal("recommendedLocations");
+		System.out.println("List of recommended locations: ");
+		for(Location location : recommendedLocations.keySet()) {
+			System.out.println(location.getName());
+			System.out.println(recommendedLocations.get(location));
+		}
+		
 		kieSession.dispose();
 	}
 

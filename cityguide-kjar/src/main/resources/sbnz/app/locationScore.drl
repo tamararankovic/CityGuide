@@ -1,0 +1,93 @@
+package sbnz.app;
+
+import sbnz.app.model.*;
+import sbnz.app.fact.*;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
+declare LocationScoreByPopularity
+	requestId : long
+	locationId : long
+	score: double
+end
+
+declare LocationScoreByPreviousExperience
+	requestId : long
+	locationId : long
+	score: double
+end
+
+rule "Location gets negative points when it's disliked by the user"
+	when
+		TripPlanRequest($userId : user.id, $requestId : id)
+		$l : Location($locationId : id)
+		not LocationScoreByPreviousExperience(requestId == $requestId, locationId == $locationId)
+		Rating(user.id == $userId, location.id == $locationId, type == RatingType.DISLIKE, $date : lastModified)
+	then
+		long monthsPassed = ChronoUnit.MONTHS.between($date, LocalDateTime.now());
+		double score = -1 / monthsPassed + 1;
+		System.out.println("Location with name: " + $l.getName() + " got " + score + " points based on previous experience");
+		insert(new LocationScoreByPreviousExperience($requestId, $locationId, score));
+end
+
+rule "Location gets 0 points when it's not disliked by the user"
+	when
+		TripPlanRequest($userId : user.id, $requestId : id)
+		$l : Location($locationId : id)
+		not LocationScoreByPreviousExperience(requestId == $requestId, locationId == $locationId)
+		not Rating(user.id == $userId, location.id == $locationId, type == RatingType.DISLIKE)
+	then
+		System.out.println("Location with name: " + $l.getName() + " got 0 points based on previous experience");
+		insert(new LocationScoreByPreviousExperience($requestId, $locationId, 0));
+end
+
+rule "Calculating location score when it is popular"
+agenda-group "score-by-popularity"
+	when
+		TripPlanRequest($requestId : id)
+		$l : Location($locationId : id)
+		Popularity(locationId == $locationId, type == PopularityType.POPULAR)
+		not LocationScoreByPopularity($locationId == locationId, $requestId == requestId)
+		accumulate(Rating($type : type, location.id == $locationId) from entry-point "similar users' ratings",
+					$likes: sum($type == RatingType.LIKE ? 1 : 0),
+					$dislikes: sum($type == RatingType.DISLIKE ? 1 : 0)
+					)
+	then
+		double score = $likes + $dislikes > 0 ? 1 - $dislikes / ($likes + $dislikes) : Constants.DEFAULT_SCORE_WHEN_POPULAR;
+		System.out.println("Location with name: " + $l.getName() + " got " + score + " points based on popularity");
+		insert(new LocationScoreByPopularity($requestId, $locationId, score));
+end
+
+rule "Calculating location score when it is unpopular"
+agenda-group "score-by-popularity"
+	when
+		TripPlanRequest($requestId : id)
+		$l : Location($locationId : id)
+		Popularity(locationId == $locationId, type == PopularityType.UNPOPULAR)
+		not LocationScoreByPopularity($locationId == locationId, $requestId == requestId)
+		accumulate(Rating($type : type, location.id == $locationId) from entry-point "similar users' ratings",
+					$likes: sum($type == RatingType.LIKE ? 1 : 0),
+					$dislikes: sum($type == RatingType.DISLIKE ? 1 : 0)
+					)
+	then
+		double score = $likes + $dislikes > 0 ? $likes / ($likes + $dislikes) / 2 : Constants.DEFAULT_SCORE_WHEN_UNPOPULAR;
+		System.out.println("Location with name: " + $l.getName() + " got " + score + " points based on popularity");
+		insert(new LocationScoreByPopularity($requestId, $locationId, score));
+end
+
+rule "Calculating location score when popularity is indeterminable"
+agenda-group "score-by-popularity"
+	when
+		TripPlanRequest($requestId : id)
+		$l : Location($locationId : id)
+		Popularity(locationId == $locationId, type == PopularityType.INDETERMINABLE)
+		not LocationScoreByPopularity($locationId == locationId, $requestId == requestId)
+		accumulate(Rating($type : type, location.id == $locationId) from entry-point "similar users' ratings",
+					$likes: sum($type == RatingType.LIKE ? 1 : 0),
+					$dislikes: sum($type == RatingType.DISLIKE ? 1 : 0)
+					)
+	then
+		double score = $likes + $dislikes > 0 ? $likes / ($likes + $dislikes) : Constants.DEFAULT_SCORE_WHEN_POPULARITY_INDETERMINABLE;
+		System.out.println("Location with name: " + $l.getName() + " got " + score + " points based on popularity");
+		insert(new LocationScoreByPopularity($requestId, $locationId, score));
+end

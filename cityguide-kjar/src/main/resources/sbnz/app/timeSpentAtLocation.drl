@@ -1,0 +1,32 @@
+package sbnz.app;
+
+import sbnz.app.model.*;
+import sbnz.app.fact.*;
+
+declare TimeEstimation
+	locationId: long
+	timeInMinutes: double
+end
+
+rule "Calculate average time when location has estimations"
+	when
+		$l : Location($locationId : id)
+		not TimeEstimation(locationId == $locationId)
+		$avgTime : Number(doubleValue > 0) from accumulate(
+											TimeSpentAtLocation($locationId == location.id, $time : estimatedTimeInMinutes), 
+											average($time))
+	then
+		System.out.println("Location with name: " + $l.getName() + " has average estimated time: " + $avgTime);
+		insert(new TimeEstimation($locationId, $avgTime.doubleValue()));
+end
+
+rule "Calculate average time when location has no estimations"
+	when
+		$l : Location($locationId : id)
+		not TimeEstimation(locationId == $locationId)
+		not TimeSpentAtLocation($locationId == location.id)
+	then
+		double $avgTime = Math.random()*(Constants.MAX_RANDOM_TIME_IN_MINUTES - Constants.MIN_RANDOM_TIME_IN_MINUTES) + Constants.MIN_RANDOM_TIME_IN_MINUTES;
+		System.out.println("Location with name: " + $l.getName() + " has average estimated time: " + $avgTime);
+		insert(new TimeEstimation($locationId, $avgTime));
+end

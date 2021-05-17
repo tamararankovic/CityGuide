@@ -1,8 +1,7 @@
 package sbnz.app;
 
-import sbnz.app.model.Feature;
-import sbnz.app.model.TripPlanRequest;
-import sbnz.app.model.LocationType;
+import sbnz.app.model.*;
+import sbnz.app.fact.*;
 
 declare enum Priority
    HIGH, REGULAR, LOW, NONE;
@@ -26,7 +25,7 @@ salience 3
 		$tpr : TripPlanRequest($requestId : id)
 		$feature: Feature()
 		not FeaturePriority(requestId == $requestId, feature == $feature)
-		featurePresentInLocationTypesMoreThan($feature, $tpr, 70;)
+		featurePresentInLocationTypesMoreThan($feature, $tpr, Constants.HIGH_MIN;)
 	then
 		System.out.println("Feature " + $feature + " has high priority");
 		insert(new FeaturePriority($tpr.getId(), $feature, Priority.HIGH));
@@ -38,7 +37,7 @@ salience 2
 		$tpr : TripPlanRequest($requestId : id)
 		$feature: Feature()
 		not FeaturePriority(requestId == $requestId, feature == $feature)
-		featurePresentInLocationTypesMoreThan($feature, $tpr, 50;)
+		featurePresentInLocationTypesMoreThan($feature, $tpr, Constants.REGULAR_MIN;)
 	then
 		System.out.println("Feature " + $feature + " has regular priority");
 		insert(new FeaturePriority($tpr.getId(), $feature, Priority.REGULAR));
@@ -50,7 +49,7 @@ salience 1
 		$tpr : TripPlanRequest($requestId : id)
 		$feature: Feature()
 		not FeaturePriority(requestId == $requestId, feature == $feature)
-		featurePresentInLocationTypesMoreThan($feature, $tpr, 30;)
+		featurePresentInLocationTypesMoreThan($feature, $tpr, Constants.LOW_MIN;)
 	then
 		System.out.println("Feature " + $feature + " has low priority");
 		insert(new FeaturePriority($tpr.getId(), $feature, Priority.LOW));
@@ -64,13 +63,4 @@ rule "Feature has no priority"
 	then
 		System.out.println("Feature " + $feature + " has no priority");
 		insert(new FeaturePriority($tpr.getId(), $feature, Priority.NONE));
-end
-
-rule "Set focus on the location-type-score agenda group"
-	when
-		forall($feature : Feature()
-			   FeaturePriority(feature == $feature))
-	then
-		System.out.println("Setting focus on the location-type-score agenda group");
-		kcontext.getKnowledgeRuntime().getAgenda().getAgendaGroup("location-type-score").setFocus();
 end

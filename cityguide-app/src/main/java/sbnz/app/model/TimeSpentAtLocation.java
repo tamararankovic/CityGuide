@@ -1,7 +1,5 @@
 package sbnz.app.model;
 
-import java.time.LocalDateTime;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,7 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
 @Entity
-public class Rating {
+public class TimeSpentAtLocation {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,26 +22,21 @@ public class Rating {
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private Location location;
 	
-	@Column(name = "type", nullable = false)
-	private RatingType type;
-	
-	@Column(name = "lastModified", nullable = false)
-	private LocalDateTime lastModified;
-	
-	public Rating() {
+	@Column(name = "estimatedTimeInMinutes", nullable = false)
+	private int estimatedTimeInMinutes;
+
+	public TimeSpentAtLocation() {
 		super();
-		lastModified = LocalDateTime.now();
 	}
-	
-	public Rating(long id, User user, Location location, RatingType type) {
+
+	public TimeSpentAtLocation(long id, User user, Location location, int estimatedTimeInMinutes) {
 		super();
 		this.id = id;
 		this.user = user;
 		this.location = location;
-		this.type = type;
-		lastModified = LocalDateTime.now();
+		this.estimatedTimeInMinutes = estimatedTimeInMinutes;
 	}
-	
+
 	public long getId() {
 		return id;
 	}
@@ -53,19 +46,7 @@ public class Rating {
 	public Location getLocation() {
 		return location;
 	}
-	public RatingType getType() {
-		return type;
-	}
-	public LocalDateTime getLastModified() {
-		return lastModified;
-	}
-	public void setType(RatingType type) {
-		this.type = type;
-		lastModified = LocalDateTime.now();
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		return id == ((Rating)obj).id;
+	public int getEstimatedTimeInMinutes() {
+		return estimatedTimeInMinutes;
 	}
 }

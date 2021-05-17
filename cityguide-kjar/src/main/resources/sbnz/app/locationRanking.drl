@@ -1,0 +1,33 @@
+package sbnz.app;
+
+import sbnz.app.model.*;
+import sbnz.app.fact.*;
+import java.util.Map;
+
+global Map<Location, Double> recommendedLocations;
+
+rule "Ranking locations"
+agenda-group "ranking-locations"
+salience $typeScore * ($scoreByPopularity + $scoreByPreviousExperience) * 100
+	when
+		TripPlanRequest($requestId : id, $days : tripDurationInDays)
+		$l : Location($locationId : id, $typeId : type.id)
+		LocationTypeScore(requestId == $requestId, 
+						  typeId == $typeId, 
+						  $typeScore : score)
+		LocationScoreByPopularity(requestId == $requestId, 
+								  locationId == $locationId, 
+								  $scoreByPopularity : score)
+		LocationScoreByPreviousExperience(requestId == $requestId, 
+										  locationId == $locationId, 
+										  $scoreByPreviousExperience : score)
+		TimeEstimation(locationId == $locationId, $avgTime : timeInMinutes)
+		eval($scoreByPopularity + $scoreByPreviousExperience > 0)
+		Number(doubleValue + $avgTime <= $days*Constants.AVAILABLE_MINUTES_PER_DAY ) from accumulate(
+												Location($id : id) from recommendedLocations.keySet() and 
+												TimeEstimation(locationId == $id, $time : timeInMinutes), 
+												sum($time))
+	then
+		System.out.println("Location with name: " + $l.getName() + " has been added to the recommended locations list");
+		recommendedLocations.put($l, $typeScore * ($scoreByPopularity + $scoreByPreviousExperience) * 100);
+end

@@ -1,0 +1,38 @@
+package sbnz.app;
+
+import sbnz.app.model.*;
+import sbnz.app.fact.*;
+import java.util.List;
+
+rule "User is similar if Jaccard index > 0.5 and at least 70% of ratings from intersection are of the same type"
+	when
+		$tpr : TripPlanRequest($userId : user.id)
+		$otherUser : User($otherUserId : id, id != $userId)
+		accumulate(Location($locationId : id) and
+				   $userRatings : List() from collect (Rating(location.id == $locationId, user.id == $userId)) and
+				   $otherUserRatings : List() from collect (Rating(location.id == $locationId, user.id == $otherUserId)),
+				   $union : sum($userRatings.size() > 0 || $otherUserRatings.size() > 0 ? 1 : 0),
+				   $intersection : sum($userRatings.size() > 0 && $otherUserRatings.size() > 0 ? 1 : 0),
+				   $sameTypeRatings : sum($userRatings.size() > 0 && $otherUserRatings.size() > 0 && ((Rating)$userRatings.get(0)).getType() == ((Rating)$otherUserRatings.get(0)).getType() ? 1 : 0)
+				   )
+		eval($union > 0)
+		eval($intersection > 0)
+		eval($intersection / $union > Constants.JACCARD_INDEX_MIN)
+		eval($sameTypeRatings / $intersection * 100 >= Constants.MIN_PERCENT_OF_SAME_TYPE_RATINGS)
+		$otherUserRatings : List() from collect (Rating(user.id == $otherUserId))
+	then
+		System.out.println("User with email: " + $otherUser.getEmail() + " is similar");
+		for (Object $r : $otherUserRatings)
+			entryPoints["similar users' ratings"].insert((Rating)$r);
+		delete($otherUser);
+end
+
+rule "Delete users that are not similar"
+salience -1
+	when
+		$tpr : TripPlanRequest($userId : user.id)
+		$otherUser : User(id != $userId)
+	then
+		System.out.println("User with email: " + $otherUser.getEmail() + " is not similar");
+		delete($otherUser);
+end

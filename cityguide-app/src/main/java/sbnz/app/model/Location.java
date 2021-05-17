@@ -11,9 +11,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
-import org.drools.core.factmodel.traits.Traitable;
-
-@Traitable
 @Entity
 public class Location implements Serializable {
 

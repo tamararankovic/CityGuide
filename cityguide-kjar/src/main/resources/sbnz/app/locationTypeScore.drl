@@ -1,7 +1,8 @@
 package sbnz.app;
 
 import sbnz.app.model.*;
-import sbnz.app.fact.event.RatingCreated;
+import sbnz.app.fact.*;
+import java.time.LocalDateTime;
 
 declare LocationTypeScore
 	requestId: long
@@ -11,6 +12,7 @@ end
 
 rule "1 point for selected location types"
 agenda-group "location-type-score"
+salience 7
 	when
 		$lt : LocationType($typeId : id)
 		$tpr : TripPlanRequest($requestId : id, preferredTypes contains $lt)
@@ -23,17 +25,18 @@ end
 rule "0.8 points for location types eligible for 0.7 and at least 3 likes and 0 dislikes for type in the past 6 months"
 extends "0.7 points for location types that only have features with high priority"
 agenda-group "location-type-score"
+salience 6
 	when
-		$likes : List(size >= 3) from collect(
-						RatingCreated($tpr.user.id == rating.user.id, 
-									  $typeId == rating.location.type.id, 
-									  typeAtCreationTime == RatingType.LIKE)
-						over window:time(6m))
+		$likes : List(size >= Constants.MIN_LIKES) from collect(
+						Rating($tpr.user.id == user.id, 
+							   $typeId == location.type.id, 
+							   type == RatingType.LIKE,
+							   lastModified.isAfter(LocalDateTime.now().minusMonths(Constants.MONTHS_IN_THE_PAST_TO_CHECK ))))
 		$dislikes : List(size == 0) from collect(
-						RatingCreated($tpr.user.id == rating.user.id, 
-									  $typeId == rating.location.type.id, 
-									  typeAtCreationTime == RatingType.DISLIKE)
-						over window:time(6m))
+						Rating($tpr.user.id == user.id, 
+							   $typeId == location.type.id, 
+							   type == RatingType.DISLIKE,
+							   lastModified.isAfter(LocalDateTime.now().minusMonths(Constants.MONTHS_IN_THE_PAST_TO_CHECK ))))
 	then
 		System.out.println("Location type with name " + $lt.getName() + " and features " + $lt.getFeatures() + " got 0.8 points");
 		insert(new LocationTypeScore($requestId, $typeId, 0.8));
@@ -41,6 +44,7 @@ end
 
 rule "0.7 points for location types that only have features with high priority"
 agenda-group "location-type-score"
+salience 5
 	when
 		$lt : LocationType($typeId : id)
 		$tpr : TripPlanRequest($requestId : id)
@@ -55,17 +59,18 @@ end
 rule "0.6 points for location types eligible for 0.5 and at least 3 likes and 0 dislikes for type in the past 6 months"
 extends "0.5 points for location types that only have features with high or regular priority"
 agenda-group "location-type-score"
+salience 4
 	when
-		$likes : List(size >= 3) from collect(
-						RatingCreated($tpr.user.id == rating.user.id, 
-									  $typeId == rating.location.type.id, 
-									  typeAtCreationTime == RatingType.LIKE)
-						over window:time(6m))
+		$likes : List(size >= Constants.MIN_LIKES) from collect(
+						Rating($tpr.user.id == user.id, 
+							   $typeId == location.type.id, 
+							   type == RatingType.LIKE,
+							   lastModified.isAfter(LocalDateTime.now().minusMonths(Constants.MONTHS_IN_THE_PAST_TO_CHECK ))))
 		$dislikes : List(size == 0) from collect(
-						RatingCreated($tpr.user.id == rating.user.id, 
-									  $typeId == rating.location.type.id, 
-									  typeAtCreationTime == RatingType.DISLIKE)
-						over window:time(6m))
+						Rating($tpr.user.id == user.id, 
+							   $typeId == location.type.id, 
+							   type == RatingType.DISLIKE,
+							   lastModified.isAfter(LocalDateTime.now().minusMonths(Constants.MONTHS_IN_THE_PAST_TO_CHECK ))))
 	then
 		System.out.println("Location type with name " + $lt.getName() + " and features " + $lt.getFeatures() + " got 0.6 points");
 		insert(new LocationTypeScore($requestId, $typeId, 0.6));
@@ -73,6 +78,7 @@ end
 
 rule "0.5 points for location types that only have features with high or regular priority"
 agenda-group "location-type-score"
+salience 3
 	when
 		$lt : LocationType($typeId : id)
 		$tpr : TripPlanRequest($requestId : id)
@@ -86,6 +92,7 @@ end
 
 rule "0.3 points for location types that have no features with no priority"
 agenda-group "location-type-score"
+salience 2
 	when
 		$lt : LocationType($typeId : id)
 		$tpr : TripPlanRequest($requestId : id)
@@ -99,6 +106,7 @@ end
 
 rule "0.2 points for location types that have one feature with no priority, but all the others with high priority"
 agenda-group "location-type-score"
+salience 1
 	when
 		$lt : LocationType($typeId : id)
 		$tpr : TripPlanRequest($requestId : id)
