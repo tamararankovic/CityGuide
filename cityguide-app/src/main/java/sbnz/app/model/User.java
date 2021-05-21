@@ -43,6 +43,15 @@ public class User {
 		this.password = password;
 		this.role = role;
 	}
+	
+	public User(String name, String surname, String email, String password, UserRole role) {
+		super();
+		this.name = name;
+		this.surname = surname;
+		this.email = email;
+		this.password = password;
+		this.role = role;
+	}
 
 	public long getId() {
 		return id;
@@ -64,6 +73,10 @@ public class User {
 		return password;
 	}
 
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	
 	public UserRole getRole() {
 		return role;
 	}
