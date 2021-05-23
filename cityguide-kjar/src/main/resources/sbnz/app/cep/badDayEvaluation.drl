@@ -1,0 +1,52 @@
+package sbnz.app.cep;
+
+import sbnz.app.model.*;
+import sbnz.app.fact.*;
+import sbnz.app.fact.event.*;
+
+import java.util.Date;
+import java.util.List;
+
+declare DailyEvaluation
+	@role(event)
+	@expires(24h)
+end
+
+rule "trigger daily evluation"
+timer (cron:0 */1 * * * ?)
+//timer (cron:0 0 0 */1 * ?)
+	when
+	then
+		System.out.println("Daily evaluation triggered");
+		insert(new DailyEvaluation());
+end
+
+rule "location had a bad day if it had had no ratings"
+	when
+		$eval : DailyEvaluation()
+		$l : Location($locationId : id)
+		not BadDay(location.id == $locationId, this after $eval)
+		not RatingCreated(location.id == $locationId, this before[ 0h, 24h ] $eval)
+	then
+		System.out.println("Location with name: " + $l.getName() + " had a bad day because of ratings");
+		insert(new BadDay($l, new Date()));
+end
+/*
+rule "location had a bad day if it had less then 5 visitors and avg time spent on a page is less then 10s"
+	when
+		$eval : DailyEvaluation()
+		$l : Location($locationId : id)
+		not BadDay(location.id == $locationId, this after $eval)
+		accumulate(LocationInfoPageVisited($lpv: this, location.id == $locationId, 
+										   this before [ 0h, 24h ] $eval, 
+										   $duration : duration),
+				   $visitors : count($lpv),
+				   $avgTimeInSeconds : average($duration / 1000)
+				   )
+		eval($visitors < 5)
+		eval($avgTimeInSeconds < 10)
+	then
+		System.out.println("Location with name: " + $l.getName() + " had a bad day because of page visits");
+		insert(new BadDay($l, new Date()));
+end
+*/

@@ -24,14 +24,18 @@ public class SampleService {
 
 	private KieSessionService sessionService;
 	private UserRepository repo;
+	private PromotionService promotionService;
 	
 	@Autowired
-	public SampleService(KieSessionService sessionService, UserRepository repo) {
+	public SampleService(KieSessionService sessionService, UserRepository repo, PromotionService promotionService) {
 		this.sessionService = sessionService;
 		this.repo = repo;
+		this.promotionService = promotionService;
 	}
 	
 	public void test() {
+		promotionService.getPromotedLocations();
+		/*
 		KieSession kieSession = sessionService.getRecommendationSession();
 		
 		List<User> users = repo.findAll();
@@ -74,5 +78,6 @@ public class SampleService {
 			System.out.println(location.getName());
 			System.out.println(recommendedLocations.get(location));
 		}
+		*/
 	}
 }

@@ -1,5 +1,7 @@
 package sbnz.app;
 
+import java.util.Scanner;
+
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieScanner;
 import org.kie.api.runtime.KieContainer;
@@ -12,6 +14,7 @@ public class CityguideApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(CityguideApplication.class, args);
+		waitForShutdownSignal();
 	}
 
 	@Bean
@@ -22,5 +25,14 @@ public class CityguideApplication {
 		KieScanner kScanner = ks.newKieScanner(kContainer);
 		kScanner.start(10_000);
 		return kContainer;
+	}
+	
+	private static void waitForShutdownSignal() {
+		System.out.println("Press 'Enter' to terminate");
+		Scanner scanner = new Scanner(System.in);
+        scanner.nextLine();
+        System.out.println("Exiting");
+        scanner.close();
+        System.exit(1);
 	}
 }

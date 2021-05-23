@@ -1,6 +1,5 @@
 package sbnz.app.fact.event;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -12,18 +11,17 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
+import org.kie.api.definition.type.Duration;
 import org.kie.api.definition.type.Role;
 import org.kie.api.definition.type.Timestamp;
 
 import sbnz.app.model.Location;
-import sbnz.app.model.RatingType;
 
 @Role(Role.Type.EVENT)
 @Timestamp("created")
+@Duration("duration")
 @Entity
-public class RatingCreated implements Serializable {
-
-	private static final long serialVersionUID = 1L;
+public class LocationInfoPageVisited {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,40 +33,45 @@ public class RatingCreated implements Serializable {
 	@Column(name = "created", nullable = false)
 	private Date created;
 	
-	@Column(name = "type", nullable = false)
-	private RatingType type;
+	@Column(name = "duration", nullable = false)
+	private long duration;
 
-	public RatingCreated() {
+	public LocationInfoPageVisited() {
 		super();
-		created = new Date();
 	}
 
-	public RatingCreated(Location location, Date created, RatingType type) {
+	public LocationInfoPageVisited(Location location, Date created, long duration) {
 		super();
 		this.location = location;
 		this.created = created;
-		this.type = type;
+		this.duration = duration;
 	}
 
 	public long getId() {
 		return id;
 	}
+
 	public Location getLocation() {
 		return location;
 	}
+
 	public void setLocation(Location location) {
 		this.location = location;
 	}
+
 	public Date getCreated() {
 		return created;
 	}
+
 	public void setCreated(Date created) {
 		this.created = created;
 	}
-	public RatingType getType() {
-		return type;
+
+	public long getDuration() {
+		return duration;
 	}
-	public void setType(RatingType type) {
-		this.type = type;
+
+	public void setDuration(long duration) {
+		this.duration = duration;
 	}
 }

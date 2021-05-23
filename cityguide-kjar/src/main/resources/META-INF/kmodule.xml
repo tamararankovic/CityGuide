@@ -4,4 +4,7 @@
 	<kbase name="recommendation" packages="sbnz.app">
         <ksession name="recommendation-session"/>
     </kbase>
+    <kbase name="promotion" packages="sbnz.app.cep" eventProcessingMode="stream">
+        <ksession name="promotion-session"/>
+    </kbase>
 </kmodule>

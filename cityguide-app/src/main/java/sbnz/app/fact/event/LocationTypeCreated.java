@@ -15,13 +15,12 @@ import javax.persistence.ManyToOne;
 import org.kie.api.definition.type.Role;
 import org.kie.api.definition.type.Timestamp;
 
-import sbnz.app.model.Location;
-import sbnz.app.model.RatingType;
+import sbnz.app.model.LocationType;
 
 @Role(Role.Type.EVENT)
 @Timestamp("created")
 @Entity
-public class RatingCreated implements Serializable {
+public class LocationTypeCreated implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -30,45 +29,38 @@ public class RatingCreated implements Serializable {
 	private long id;
 	
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	private Location location;
+	private LocationType locationType;
 	
 	@Column(name = "created", nullable = false)
 	private Date created;
-	
-	@Column(name = "type", nullable = false)
-	private RatingType type;
 
-	public RatingCreated() {
+	public LocationTypeCreated() {
 		super();
-		created = new Date();
 	}
 
-	public RatingCreated(Location location, Date created, RatingType type) {
+	public LocationTypeCreated(LocationType locationType, Date created) {
 		super();
-		this.location = location;
+		this.locationType = locationType;
 		this.created = created;
-		this.type = type;
 	}
 
 	public long getId() {
 		return id;
 	}
-	public Location getLocation() {
-		return location;
+
+	public LocationType getLocationType() {
+		return locationType;
 	}
-	public void setLocation(Location location) {
-		this.location = location;
+
+	public void setLocationType(LocationType locationType) {
+		this.locationType = locationType;
 	}
+
 	public Date getCreated() {
 		return created;
 	}
+
 	public void setCreated(Date created) {
 		this.created = created;
-	}
-	public RatingType getType() {
-		return type;
-	}
-	public void setType(RatingType type) {
-		this.type = type;
 	}
 }

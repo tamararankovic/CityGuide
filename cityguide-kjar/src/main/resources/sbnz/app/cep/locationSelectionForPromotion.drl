@@ -1,0 +1,62 @@
+package sbnz.app.cep;
+
+import sbnz.app.model.*;
+import sbnz.app.fact.*;
+import sbnz.app.fact.event.*;
+
+import java.util.Date;
+import java.util.List;
+
+rule "promote every newly added location for 2h"
+	when
+		$l : Location() from entry-point "new location"
+	then
+		System.out.println("New location with name: " + $l.getName() + " will be promoted for 2h");
+		insert(new Promotion($l, new Date(), 2*60*60*1000));
+end
+
+rule "promote location for 5h if it had had 3 bad days in a row"
+	when
+		$l : Location($locationId : id)
+		$lastThreeBadDays : List(size == 3) from collect(
+											BadDay(location.id == $locationId) 
+											over window:length(3))
+		$badDaysInLast72h : Number(intValue == 3) from accumulate(BadDay($badDay: this, 
+																  $lastThreeBadDays contains this) 
+													over window:time(72h),
+									 				count($badDay))
+	then
+		System.out.println("Location with name: " + $l.getName() + " will be promoted for 5h");
+		insert(new Promotion($l, new Date(), 30*1000));
+		//insert(new Promotion($l, new Date(), 5*60*60*1000));
+end
+
+rule "promote locations for 3h if their type was created more than 72h ago and none of its locations have ratings"
+	when
+		$nonTargetedTypes : List() from accumulate(LocationTypeCreated($type: locationType)
+												   over window:time(72h),
+												   collectList($type))
+		LocationTypeCreated($lt: locationType not memberOf $nonTargetedTypes)
+		$locations : List() from collect(Location(type.id == $lt.id))
+		forall(Location($id: id, this memberOf $locations)
+			   List(size == 0) from collect (RatingCreated(location.id == $id))
+		)
+	then
+		System.out.println("Locations with the location type: " + $lt.getName() + " will be promoted for 3h");
+		for(Object $l : $locations)
+			insert(new Promotion((Location)$l, new Date(), 3*60*60*1000));
+end
+
+rule "decide not to promote a location if it had at least 10 ratings in the last 24h and more than 70% of them are dislieks"
+	when
+		$p : Promotion($l: location, processed == false)
+		accumulate(RatingCreated(location.id == $l.id, $rating: this, $type: type)
+				   over window:time(24h),
+				   $total: count($rating),
+				   $dislikes: sum($type == RatingType.DISLIKE ? 1 : 0))
+		eval($total > 10)
+		eval($dislikes/$total*100 > 70)
+	then
+		System.out.println("Location with name: " + $l.getName() + " won't be promoted at the moment");
+		delete($p);
+end

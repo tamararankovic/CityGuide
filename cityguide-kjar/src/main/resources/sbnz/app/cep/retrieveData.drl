@@ -1,0 +1,17 @@
+package sbnz.app.cep;
+
+import sbnz.app.fact.event.*;
+
+query "getPromotions"
+    $result: Promotion()
+end
+
+query "getBadDays"
+	$result: BadDay()
+end
+
+query "getPromotedLocations"
+	$lrr : LocationRetrievalRequest()
+	accumulate(Promotion(this includes $lrr, $location : location),
+				$locations : collectSet($location))
+end

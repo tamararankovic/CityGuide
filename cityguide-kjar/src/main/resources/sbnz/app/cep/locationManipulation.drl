@@ -1,0 +1,56 @@
+package sbnz.app.cep;
+
+import sbnz.app.model.*;
+import sbnz.app.fact.*;
+import sbnz.app.fact.event.*;
+
+import java.util.Date;
+import java.util.List;
+
+rule "insert location fact when it is created"
+	when
+		LocationCreated($l : location)
+	then
+		System.out.println("Location with name: " + $l.getName() + " is inserted");
+		insert($l);
+end
+
+rule "insert location fact in entry point new location when the new one is added"
+	when
+		LocationCreated($l : location) from entry-point "new location"
+	then
+		System.out.println("New location with name: " + $l.getName() + " is inserted");
+		entryPoints["new location"].insert($l);
+end
+
+rule "delete location fact when it is deleted"
+	when
+		$ld : LocationDeleted($l : location)
+		$lc : LocationCreated(location.id == $l.id)
+	then
+		System.out.println("Location with name: " + $l.getName() + " is deleted");
+		delete($l);
+		delete($lc);
+		delete($ld);	
+end
+
+rule "delete location type"
+	when
+		$ltd : LocationTypeDeleted($ltId : locationType.id, $lt : locationType)
+		$ltc : LocationTypeCreated(locationType.id == $ltId)
+	then
+		System.out.println("Location type with name: " + $lt.getName() + " is deleted");
+		delete($ltc);
+		delete($ltd);
+end
+
+rule "delete location if it had 3 or more unsuccessful promotions"
+	when
+		$l : Location($locationId : id)
+		List(size >= 3) from collect(Promotion(processed == true, 
+											   location.id == $locationId, 
+											   type == PromotionEvalType.UNSUCCESSFUL))
+	then
+		System.out.println("Location with name: " + $l.getName() + " is deleted because it had unsuccessful promotions");
+		delete($l);
+end
