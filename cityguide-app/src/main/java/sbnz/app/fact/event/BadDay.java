@@ -2,7 +2,6 @@ package sbnz.app.fact.event;
 
 import java.util.Date;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,6 +10,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
+import org.kie.api.definition.type.Expires;
 import org.kie.api.definition.type.Role;
 import org.kie.api.definition.type.Timestamp;
 
@@ -18,6 +18,8 @@ import sbnz.app.model.Location;
 
 @Role(Role.Type.EVENT)
 @Timestamp("created")
+@Expires("3m")
+//@Expires("72h")
 @Entity
 public class BadDay {
 
@@ -25,7 +27,7 @@ public class BadDay {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.LAZY)
 	private Location location;
 	
 	@Column(name = "created", nullable = false)

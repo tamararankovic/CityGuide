@@ -6,8 +6,6 @@ public interface KieSessionService {
 
 	 public KieSession getRecommendationSession();
 	 
-	 public void releaseRecommendationSession();
-	 
 	 public KieSession getPromotionSession();
 	 
 	 public void releasePromotionSession();

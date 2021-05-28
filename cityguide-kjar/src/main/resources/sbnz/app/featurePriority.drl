@@ -22,45 +22,45 @@ end
 rule "Feature has high priority"
 salience 3
 	when
-		$tpr : TripPlanRequest($requestId : id)
+		$tpr : TripPlanRequest($requestId : user.id)
 		$feature: Feature()
 		not FeaturePriority(requestId == $requestId, feature == $feature)
 		featurePresentInLocationTypesMoreThan($feature, $tpr, Constants.HIGH_MIN;)
 	then
 		System.out.println("Feature " + $feature + " has high priority");
-		insert(new FeaturePriority($tpr.getId(), $feature, Priority.HIGH));
+		insert(new FeaturePriority($requestId, $feature, Priority.HIGH));
 end
 		
 rule "Feature has regular priority"
 salience 2
 	when
-		$tpr : TripPlanRequest($requestId : id)
+		$tpr : TripPlanRequest($requestId : user.id)
 		$feature: Feature()
 		not FeaturePriority(requestId == $requestId, feature == $feature)
 		featurePresentInLocationTypesMoreThan($feature, $tpr, Constants.REGULAR_MIN;)
 	then
 		System.out.println("Feature " + $feature + " has regular priority");
-		insert(new FeaturePriority($tpr.getId(), $feature, Priority.REGULAR));
+		insert(new FeaturePriority($requestId, $feature, Priority.REGULAR));
 end
 
 rule "Feature has low priority"
 salience 1
 	when
-		$tpr : TripPlanRequest($requestId : id)
+		$tpr : TripPlanRequest($requestId : user.id)
 		$feature: Feature()
 		not FeaturePriority(requestId == $requestId, feature == $feature)
 		featurePresentInLocationTypesMoreThan($feature, $tpr, Constants.LOW_MIN;)
 	then
 		System.out.println("Feature " + $feature + " has low priority");
-		insert(new FeaturePriority($tpr.getId(), $feature, Priority.LOW));
+		insert(new FeaturePriority($requestId, $feature, Priority.LOW));
 end
 
 rule "Feature has no priority"
 	when
-		$tpr : TripPlanRequest($requestId : id)
+		$tpr : TripPlanRequest($requestId : user.id)
 		$feature: Feature()
 		not FeaturePriority(requestId == $requestId, feature == $feature)
 	then
 		System.out.println("Feature " + $feature + " has no priority");
-		insert(new FeaturePriority($tpr.getId(), $feature, Priority.NONE));
+		insert(new FeaturePriority($requestId, $feature, Priority.NONE));
 end

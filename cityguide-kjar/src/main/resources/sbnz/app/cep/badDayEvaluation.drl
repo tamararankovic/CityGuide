@@ -9,7 +9,8 @@ import java.util.List;
 
 declare DailyEvaluation
 	@role(event)
-	@expires(24h)
+	//@expires(23h59m59s)
+	@expires(59s)
 end
 
 rule "trigger daily evluation"
@@ -25,18 +26,19 @@ rule "location had a bad day if it had had no ratings"
 	when
 		$eval : DailyEvaluation()
 		$l : Location($locationId : id)
-		not BadDay(location.id == $locationId, this after $eval)
-		not RatingCreated(location.id == $locationId, this before[ 0h, 24h ] $eval)
+		List(size == 0) from collect(BadDay(location.id == $locationId, this after $eval))
+		List(size == 0) from collect(RatingCreated(location.id == $locationId, this before[ 0h, 24h ] $eval))
 	then
 		System.out.println("Location with name: " + $l.getName() + " had a bad day because of ratings");
 		insert(new BadDay($l, new Date()));
 end
-/*
+
 rule "location had a bad day if it had less then 5 visitors and avg time spent on a page is less then 10s"
+salience -1
 	when
 		$eval : DailyEvaluation()
-		$l : Location($locationId : id)
-		not BadDay(location.id == $locationId, this after $eval)
+		$l : Location(this != null, $locationId : id)
+		List(size == 0) from collect(BadDay(location.id == $locationId, this after $eval))
 		accumulate(LocationInfoPageVisited($lpv: this, location.id == $locationId, 
 										   this before [ 0h, 24h ] $eval, 
 										   $duration : duration),
@@ -49,4 +51,3 @@ rule "location had a bad day if it had less then 5 visitors and avg time spent o
 		System.out.println("Location with name: " + $l.getName() + " had a bad day because of page visits");
 		insert(new BadDay($l, new Date()));
 end
-*/

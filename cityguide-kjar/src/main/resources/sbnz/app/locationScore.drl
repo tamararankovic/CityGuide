@@ -19,7 +19,7 @@ end
 
 rule "Location gets negative points when it's disliked by the user"
 	when
-		TripPlanRequest($userId : user.id, $requestId : id)
+		TripPlanRequest($userId : user.id, $requestId : user.id)
 		$l : Location($locationId : id)
 		not LocationScoreByPreviousExperience(requestId == $requestId, locationId == $locationId)
 		Rating(user.id == $userId, location.id == $locationId, type == RatingType.DISLIKE, $date : lastModified)
@@ -32,7 +32,7 @@ end
 
 rule "Location gets 0 points when it's not disliked by the user"
 	when
-		TripPlanRequest($userId : user.id, $requestId : id)
+		TripPlanRequest($userId : user.id, $requestId : user.id)
 		$l : Location($locationId : id)
 		not LocationScoreByPreviousExperience(requestId == $requestId, locationId == $locationId)
 		not Rating(user.id == $userId, location.id == $locationId, type == RatingType.DISLIKE)
@@ -44,7 +44,7 @@ end
 rule "Calculating location score when it is popular"
 agenda-group "score-by-popularity"
 	when
-		TripPlanRequest($requestId : id)
+		TripPlanRequest($requestId : user.id)
 		$l : Location($locationId : id)
 		Popularity(locationId == $locationId, type == PopularityType.POPULAR)
 		not LocationScoreByPopularity($locationId == locationId, $requestId == requestId)
@@ -61,7 +61,7 @@ end
 rule "Calculating location score when it is unpopular"
 agenda-group "score-by-popularity"
 	when
-		TripPlanRequest($requestId : id)
+		TripPlanRequest($requestId : user.id)
 		$l : Location($locationId : id)
 		Popularity(locationId == $locationId, type == PopularityType.UNPOPULAR)
 		not LocationScoreByPopularity($locationId == locationId, $requestId == requestId)
@@ -78,7 +78,7 @@ end
 rule "Calculating location score when popularity is indeterminable"
 agenda-group "score-by-popularity"
 	when
-		TripPlanRequest($requestId : id)
+		TripPlanRequest($requestId : user.id)
 		$l : Location($locationId : id)
 		Popularity(locationId == $locationId, type == PopularityType.INDETERMINABLE)
 		not LocationScoreByPopularity($locationId == locationId, $requestId == requestId)

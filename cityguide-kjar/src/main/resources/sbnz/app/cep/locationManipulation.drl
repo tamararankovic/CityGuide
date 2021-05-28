@@ -17,19 +17,34 @@ end
 
 rule "insert location fact in entry point new location when the new one is added"
 	when
-		LocationCreated($l : location) from entry-point "new location"
+		$lc : LocationCreated($l : location) from entry-point "new location"
 	then
 		System.out.println("New location with name: " + $l.getName() + " is inserted");
 		entryPoints["new location"].insert($l);
+		insert($lc);
 end
 
 rule "delete location fact when it is deleted"
 	when
 		$ld : LocationDeleted($l : location)
+		$loc : List() from collect(Location(id == $l.id))
 		$lc : LocationCreated(location.id == $l.id)
+		$badDays : List() from collect(BadDay(location.id == $l.id))
+		$promotions : List() from collect(Promotion(location.id == $l.id))
+		$ratings : List() from collect(RatingCreated(location.id == $l.id))
+		$visits : List() from collect(LocationInfoPageVisited(location.id == $l.id))
 	then
 		System.out.println("Location with name: " + $l.getName() + " is deleted");
-		delete($l);
+		for(Object $lo : $loc)
+			delete($lo);
+		for(Object $b : $badDays)
+			delete($b);
+		for(Object $p : $promotions)
+			delete($p);
+		for(Object $r : $ratings)
+			delete($r);
+		for(Object $v : $visits)
+			delete($v);
 		delete($lc);
 		delete($ld);	
 end

@@ -1,5 +1,6 @@
 package sbnz.app.model;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -9,8 +10,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-
-import sbnz.app.model.Feature;
 
 @Entity
 public class LocationType {
@@ -23,7 +22,7 @@ public class LocationType {
 	private String name;
 	
 	@ElementCollection(fetch = FetchType.LAZY)
-	private Set<Feature> features;
+	private Set<Feature> features = new HashSet<Feature>();
 	
 	public LocationType() {
 		super();
@@ -36,6 +35,10 @@ public class LocationType {
 		this.features = features;
 	}
 	
+	public LocationType(String name) {
+		this.name = name;
+	}
+
 	public long getId() {
 		return id;
 	}
@@ -44,6 +47,9 @@ public class LocationType {
 	}
 	public Set<Feature> getFeatures() {
 		return features;
+	}
+	public void addFeature(Feature feature) {
+		features.add(feature);
 	}
 
 	@Override

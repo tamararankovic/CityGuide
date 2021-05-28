@@ -5,8 +5,14 @@ import sbnz.app.model.*;
 rule "Set focus on the location-type-score agenda group"
 salience -10
 	when
+		TripPlanRequest($userId : user.id)
 		forall($feature : Feature()
 			   FeaturePriority(feature == $feature))
+		forall(Location($locationId : id)
+			   Popularity(locationId == $locationId)
+			   LocationScoreByPreviousExperience(locationId == $locationId)
+			   TimeEstimation(locationId == $locationId))
+		not User(id != $userId)
 	then
 		System.out.println("Setting focus on the location-type-score agenda group");
 		kcontext.getKnowledgeRuntime().getAgenda().getAgendaGroup("location-type-score").setFocus();
@@ -16,10 +22,8 @@ rule "Set focus on the score-by-popularity agenda group"
 agenda-group "location-type-score"
 salience -10
 	when
-		$tpr : TripPlanRequest($userId : user.id)
-		forall(Location($locationId : id)
-			   Popularity(locationId == $locationId))
-		not User(id != $userId)
+		forall(LocationType($typeId : id)
+			   LocationTypeScore(typeId == $typeId))
 	then
 		System.out.println("Setting focus on the score-by-popularity agenda group");
 		kcontext.getKnowledgeRuntime().getAgenda().getAgendaGroup("score-by-popularity").setFocus();
@@ -29,12 +33,8 @@ rule "Set focus on the ranking-locations agenda group"
 agenda-group "score-by-popularity"
 salience -10
 	when
-		$tpr : TripPlanRequest($requestId : id)
 		forall(Location($locationId : id, $typeId : type.id)
-			   LocationTypeScore(requestId == $requestId, typeId == $typeId)
-			   LocationScoreByPopularity(requestId == $requestId, locationId == $locationId)
-			   LocationScoreByPreviousExperience(requestId == $requestId, locationId == $locationId)
-			   TimeEstimation(locationId == $locationId)
+			   LocationScoreByPopularity(locationId == $locationId)
 			   )
 	then
 		System.out.println("Setting focus on the ranking-locations agenda group");

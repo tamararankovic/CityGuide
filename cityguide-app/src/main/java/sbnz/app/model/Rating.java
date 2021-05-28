@@ -18,10 +18,10 @@ public class Rating {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private User user;
 	
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private Location location;
 	
 	@Column(name = "type", nullable = false)
@@ -35,9 +35,8 @@ public class Rating {
 		lastModified = LocalDateTime.now();
 	}
 	
-	public Rating(long id, User user, Location location, RatingType type) {
+	public Rating(User user, Location location, RatingType type) {
 		super();
-		this.id = id;
 		this.user = user;
 		this.location = location;
 		this.type = type;

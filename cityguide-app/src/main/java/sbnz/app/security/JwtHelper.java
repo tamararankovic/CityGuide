@@ -18,7 +18,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 public class JwtHelper {
 
 	private final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
-	private final int EXPIRES_IN = 300000;
+	private final int EXPIRES_IN = 3000000;
 	private String SECRET;
 	private final String AUTH_HEADER = "Authorization";
 	

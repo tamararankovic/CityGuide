@@ -23,7 +23,7 @@ public class Constants {
 	
 	//location type score
 	public static final int MIN_LIKES = 3;
-	public static final int MONTHS_IN_THE_PAST_TO_CHECK = 6;
+	public static final long MONTHS_IN_THE_PAST_TO_CHECK = 6;
 	
 	//location score
 	public static final double DEFAULT_SCORE_WHEN_POPULARITY_INDETERMINABLE = 0.5; 

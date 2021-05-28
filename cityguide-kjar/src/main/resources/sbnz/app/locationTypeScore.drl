@@ -15,7 +15,7 @@ agenda-group "location-type-score"
 salience 7
 	when
 		$lt : LocationType($typeId : id)
-		$tpr : TripPlanRequest($requestId : id, preferredTypes contains $lt)
+		$tpr : TripPlanRequest($requestId : user.id, preferredTypes contains $lt)
 		not LocationTypeScore($typeId == typeId, $requestId == requestId)
 	then
 		System.out.println("Location type with name " + $lt.getName() + " and features " + $lt.getFeatures() + " got 1 point");
@@ -47,7 +47,7 @@ agenda-group "location-type-score"
 salience 5
 	when
 		$lt : LocationType($typeId : id)
-		$tpr : TripPlanRequest($requestId : id)
+		$tpr : TripPlanRequest($requestId : user.id)
 		not LocationTypeScore($typeId == typeId, $requestId == requestId)
 		forall($feature : Feature(this memberOf $lt.features)
 				FeaturePriority($feature == feature, $requestId == requestId, priority == Priority.HIGH))
@@ -81,7 +81,7 @@ agenda-group "location-type-score"
 salience 3
 	when
 		$lt : LocationType($typeId : id)
-		$tpr : TripPlanRequest($requestId : id)
+		$tpr : TripPlanRequest($requestId : user.id)
 		not LocationTypeScore($typeId == typeId, $requestId == requestId)
 		forall($feature : Feature(this memberOf $lt.features)
 				FeaturePriority($feature == feature && $requestId == requestId && (priority == Priority.HIGH || priority == Priority.REGULAR)))
@@ -95,7 +95,7 @@ agenda-group "location-type-score"
 salience 2
 	when
 		$lt : LocationType($typeId : id)
-		$tpr : TripPlanRequest($requestId : id)
+		$tpr : TripPlanRequest($requestId : user.id)
 		not LocationTypeScore($typeId == typeId, $requestId == requestId)
 		forall($feature : Feature(this memberOf $lt.features)
 				FeaturePriority($feature == feature, $requestId == requestId, priority != Priority.NONE))
@@ -109,7 +109,7 @@ agenda-group "location-type-score"
 salience 1
 	when
 		$lt : LocationType($typeId : id)
-		$tpr : TripPlanRequest($requestId : id)
+		$tpr : TripPlanRequest($requestId : user.id)
 		not LocationTypeScore($typeId == typeId, $requestId == requestId)
 		$nonePriorityFeatures : List(size == 1) from accumulate(
 											FeaturePriority($f : feature, $requestId == requestId, priority == Priority.NONE)
@@ -126,7 +126,7 @@ rule "0 points for remaining location types"
 agenda-group "location-type-score"
 	when
 		$lt : LocationType($typeId : id)
-		$tpr : TripPlanRequest($requestId : id)
+		$tpr : TripPlanRequest($requestId : user.id)
 		not LocationTypeScore($typeId == typeId, $requestId == requestId)
 	then
 		System.out.println("Location type with name " + $lt.getName() + " and features " + $lt.getFeatures() + " got 0 points");

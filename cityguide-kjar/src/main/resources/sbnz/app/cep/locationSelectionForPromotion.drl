@@ -16,17 +16,14 @@ rule "promote every newly added location for 2h"
 end
 
 rule "promote location for 5h if it had had 3 bad days in a row"
+no-loop
 	when
 		$l : Location($locationId : id)
-		$lastThreeBadDays : List(size == 3) from collect(
-											BadDay(location.id == $locationId) 
-											over window:length(3))
-		$badDaysInLast72h : Number(intValue == 3) from accumulate(BadDay($badDay: this, 
-																  $lastThreeBadDays contains this) 
+		$badDaysInLast72h : Number(intValue == 3) from accumulate(BadDay($badDay: this, location.id == $locationId) 
 													over window:time(72h),
 									 				count($badDay))
 	then
-		System.out.println("Location with name: " + $l.getName() + " will be promoted for 5h");
+		System.out.println("Location with name: " + $l.getName() + " will be promoted for 5h " + $badDaysInLast72h);
 		insert(new Promotion($l, new Date(), 30*1000));
 		//insert(new Promotion($l, new Date(), 5*60*60*1000));
 end
@@ -50,7 +47,7 @@ end
 rule "decide not to promote a location if it had at least 10 ratings in the last 24h and more than 70% of them are dislieks"
 	when
 		$p : Promotion($l: location, processed == false)
-		accumulate(RatingCreated(location.id == $l.id, $rating: this, $type: type)
+		accumulate(RatingCreated(location.id == $l.id, $rating: this, $type: type, this before $p)
 				   over window:time(24h),
 				   $total: count($rating),
 				   $dislikes: sum($type == RatingType.DISLIKE ? 1 : 0))

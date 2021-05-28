@@ -11,7 +11,6 @@ import sbnz.app.service.KieSessionService;
 public class KieSessionServiceImpl implements KieSessionService {
 
 	private final KieContainer kieContainer;
-    private KieSession recommendationSession;
     private KieSession promotionSession;
     
     private final String RECOMMENDATION_SESSION_NAME = "recommendation-session";
@@ -23,10 +22,7 @@ public class KieSessionServiceImpl implements KieSessionService {
     }
     
     public KieSession getRecommendationSession() {
-    	if (this.recommendationSession == null) {
-        	recommendationSession = kieContainer.newKieSession(RECOMMENDATION_SESSION_NAME);
-    	}
-        return recommendationSession;
+        return kieContainer.newKieSession(RECOMMENDATION_SESSION_NAME);
     }
     
     public KieSession getPromotionSession() {
@@ -34,11 +30,6 @@ public class KieSessionServiceImpl implements KieSessionService {
         	promotionSession = kieContainer.newKieSession(PROMOTION_SESSION_NAME);
     	}
         return promotionSession;
-    }
-    
-    public void releaseRecommendationSession() {
-        this.recommendationSession.dispose();
-        this.recommendationSession = null;
     }
     
     public void releasePromotionSession() {

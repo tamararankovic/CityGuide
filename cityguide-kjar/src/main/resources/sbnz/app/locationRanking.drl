@@ -10,7 +10,7 @@ rule "Ranking locations"
 agenda-group "ranking-locations"
 salience $typeScore * ($scoreByPopularity + $scoreByPreviousExperience) * 100
 	when
-		TripPlanRequest($requestId : id, $days : tripDurationInDays)
+		TripPlanRequest($requestId : user.id, $days : tripDurationInDays)
 		$l : Location($locationId : id, $typeId : type.id)
 		LocationTypeScore(requestId == $requestId, 
 						  typeId == $typeId, 

@@ -43,6 +43,7 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public String logIn(String email, String password) throws UserNotFoundException {
 		String encodedPassword = PasswordEncoder.cryptWithMD5(password);
+		System.out.println("password: " + encodedPassword);
 		User user = userRepository.findByEmailAndPassword(email, encodedPassword);
 		if(user != null) {
 			UserClaims claims = new UserClaims();

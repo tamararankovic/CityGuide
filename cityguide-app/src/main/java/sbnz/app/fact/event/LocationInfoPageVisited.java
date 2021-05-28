@@ -27,7 +27,7 @@ public class LocationInfoPageVisited {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private Location location;
 	
 	@Column(name = "created", nullable = false)

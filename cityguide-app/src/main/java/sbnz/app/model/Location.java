@@ -20,7 +20,7 @@ public class Location implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
 	private LocationType type;
 	
 	@Column(name = "name", nullable = false)
@@ -42,6 +42,15 @@ public class Location implements Serializable {
 	public Location(long id, LocationType type, String name, String address, String description, String imageFilePath) {
 		super();
 		this.id = id;
+		this.type = type;
+		this.name = name;
+		this.address = address;
+		this.description = description;
+		this.imageFilePath = imageFilePath;
+	}
+	
+	public Location(LocationType type, String name, String address, String description, String imageFilePath) {
+		super();
 		this.type = type;
 		this.name = name;
 		this.address = address;

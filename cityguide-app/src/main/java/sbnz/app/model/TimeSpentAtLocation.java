@@ -16,10 +16,7 @@ public class TimeSpentAtLocation {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	private User user;
-	
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private Location location;
 	
 	@Column(name = "estimatedTimeInMinutes", nullable = false)
@@ -29,19 +26,14 @@ public class TimeSpentAtLocation {
 		super();
 	}
 
-	public TimeSpentAtLocation(long id, User user, Location location, int estimatedTimeInMinutes) {
+	public TimeSpentAtLocation(Location location, int estimatedTimeInMinutes) {
 		super();
-		this.id = id;
-		this.user = user;
 		this.location = location;
 		this.estimatedTimeInMinutes = estimatedTimeInMinutes;
 	}
 
 	public long getId() {
 		return id;
-	}
-	public User getUser() {
-		return user;
 	}
 	public Location getLocation() {
 		return location;
