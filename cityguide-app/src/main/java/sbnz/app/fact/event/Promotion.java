@@ -30,7 +30,7 @@ public class Promotion implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	private Location location;
 	
 	@Column(name = "created", nullable = false)

@@ -19,12 +19,14 @@ import sbnz.app.model.Feature;
 import sbnz.app.model.Location;
 import sbnz.app.model.LocationType;
 import sbnz.app.model.Rating;
+import sbnz.app.model.TimeSpentAtLocation;
 import sbnz.app.model.TripPlanRequest;
 import sbnz.app.model.User;
 import sbnz.app.model.UserRole;
 import sbnz.app.repository.LocationRepository;
 import sbnz.app.repository.LocationTypeRepository;
 import sbnz.app.repository.RatingRepository;
+import sbnz.app.repository.TimeSpentAtLocationRepository;
 import sbnz.app.repository.UserRepository;
 import sbnz.app.service.KieSessionService;
 import sbnz.app.service.LocationService;
@@ -39,11 +41,12 @@ public class TripPlanServiceImpl implements TripPlanService {
 	private RatingRepository ratingRepository;
 	private KieSessionService sessionService;
 	private LocationService locationService;
+	private TimeSpentAtLocationRepository timeRepository;
 	
 	@Autowired
 	public TripPlanServiceImpl(UserRepository userRepository, LocationRepository locationRepository,
 			LocationTypeRepository typeRepository, RatingRepository ratingRepository, KieSessionService sessionService,
-			LocationService locationService) {
+			LocationService locationService, TimeSpentAtLocationRepository timeRepository) {
 		super();
 		this.userRepository = userRepository;
 		this.locationRepository = locationRepository;
@@ -51,6 +54,7 @@ public class TripPlanServiceImpl implements TripPlanService {
 		this.ratingRepository = ratingRepository;
 		this.sessionService = sessionService;
 		this.locationService = locationService;
+		this.timeRepository = timeRepository;
 	}
 
 	@Override
@@ -93,8 +97,9 @@ public class TripPlanServiceImpl implements TripPlanService {
 			session.insert(lt);
 		for(Rating r : ratingRepository.findAll())
 			session.insert(r);
-		for(Feature f : Feature.values()) {
+		for(Feature f : Feature.values())
 			session.insert(f);
-		}
+		for(TimeSpentAtLocation t : timeRepository.findAll())
+			session.insert(t);
 	}
 }

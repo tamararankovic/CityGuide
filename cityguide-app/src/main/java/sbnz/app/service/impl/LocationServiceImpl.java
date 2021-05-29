@@ -109,6 +109,7 @@ public class LocationServiceImpl implements LocationService {
 
 	@Override
 	public void addLocation(NewLocationDTO newLocation) throws LocationTypeNotFoundException {
+		System.out.println(newLocation.getTypeId());
 		LocationType type = typeRepository.findById(newLocation.getTypeId()).orElse(null);
 		if(type == null)
 			throw new LocationTypeNotFoundException();

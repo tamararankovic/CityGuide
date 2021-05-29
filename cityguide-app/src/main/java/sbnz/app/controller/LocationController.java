@@ -102,7 +102,7 @@ public class LocationController {
 		try {
 			String jwt = jwtHelper.getJwtFromRequest(request);
 			User user = authService.getAuthorized(jwt, UserRole.BASIC_USER);
-			return locationService.get(user.getId(), locationId);
+			return locationService.get(locationId, user.getId());
 		} catch (UnauthenticatedException e) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not logged in");
 		} catch (UnauthorizedException e) {

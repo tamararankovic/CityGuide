@@ -1,0 +1,26 @@
+<div style="height: max-content;">
+    <div style="background-color: white; margin-top:100px; margin-bottom: 100px; height: max-content; margin-left: 40%; width: 20%; padding: 20px;" class="mat-elevation-z8">
+        <form (submit)="add(typess.selectedOptions.selected)" #feedform="ngForm" novalidate>
+            <h2 style="text-align: center;">
+                Add new location type
+            </h2>
+            <div class="item1">
+              <mat-form-field style="width:100%;">
+                  <mat-label>Name</mat-label>
+                  <input matInput required id="usernameInput" #name = "ngModel" name="c1" [(ngModel)] = "namee" style="height: 40%;"/>
+              </mat-form-field>
+            </div>
+            <div class="item3">
+                <mat-selection-list #typess style="width: 100%;">
+                    <mat-list-option *ngFor="let f of features" [value]="f">
+                      {{f}}
+                    </mat-list-option>
+                </mat-selection-list>
+            </div>
+            <div style="text-align: center; margin-top: 50px;">
+              <button id="loginButton" [disabled] ="name.invalid" mat-raised-button type="submit" style="padding: 12px 32px; opacity: 120%; border-radius: 20%; background-color: coral; color: white;">Add</button>
+            </div>
+        </form>
+    </div>
+</div>
+

@@ -1,0 +1,33 @@
+<h1 style="margin-top: 30px; margin-bottom: 10px; text-align: center;">{{title}}</h1>
+<div class="content" fxLayout="row wrap">
+    <div id="loc" fxFlex="25%" *ngFor ="let l of locations" style="margin: 20px">
+      <mat-card class="mat-elevation-z8" style="min-height: 250px; max-height: 250px;">
+        <mat-card-header (click)="showDetails(l.id)">
+            <mat-card-title>{{l.name}}</mat-card-title>
+            <mat-card-subtitle>{{l.type}}</mat-card-subtitle>
+            <mat-card-subtitle>{{l.address}}</mat-card-subtitle>
+        </mat-card-header>
+        <img mat-card-image src="assets/ns.jpg" alt="Photo of the location">
+        <mat-card-content>
+            {{l.likes}} likes {{l.dislikes}} dislikes
+        </mat-card-content>
+        <mat-card-actions>
+            <div *ngIf="this.authService.getRole() == 'BASIC_USER' && !l.rated">
+                <button mat-button (click)="like(l)">LIKE</button>
+                <button mat-button (click)="dislike(l)">DISLIKE</button>
+            </div>
+            <div *ngIf="this.authService.getRole() == 'BASIC_USER' && l.rated && l.liked">
+                <button mat-raised-button style="color: white; background-color: coral;">LIKED</button>
+                <button mat-button (click)="dislike(l)">DISLIKE</button>
+            </div>
+            <div *ngIf="this.authService.getRole() == 'BASIC_USER' && l.rated && !l.liked">
+                <button mat-button (click)="like(l)">LIKE</button>
+                <button mat-raised-button style="color: white; background-color: coral;">DISLIKED</button>
+            </div>
+            <div *ngIf="this.authService.getRole() == 'ADMIN'">
+                <button mat-raised-button style="color: white; background-color: coral;" (click)="delete(l)">DELETE</button>
+            </div>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+</div>

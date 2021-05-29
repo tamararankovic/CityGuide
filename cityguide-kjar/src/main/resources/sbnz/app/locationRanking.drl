@@ -4,6 +4,11 @@ import sbnz.app.model.*;
 import sbnz.app.fact.*;
 import java.util.Map;
 
+declare SelectedLocation
+	locationId : long
+	time : double
+end
+
 global Map<Location, Double> recommendedLocations;
 
 rule "Ranking locations"
@@ -12,6 +17,7 @@ salience $typeScore * ($scoreByPopularity + $scoreByPreviousExperience) * 100
 	when
 		TripPlanRequest($requestId : user.id, $days : tripDurationInDays)
 		$l : Location($locationId : id, $typeId : type.id)
+		not SelectedLocation(locationId == $locationId)
 		LocationTypeScore(requestId == $requestId, 
 						  typeId == $typeId, 
 						  $typeScore : score)
@@ -23,11 +29,18 @@ salience $typeScore * ($scoreByPopularity + $scoreByPreviousExperience) * 100
 										  $scoreByPreviousExperience : score)
 		TimeEstimation(locationId == $locationId, $avgTime : timeInMinutes)
 		eval($scoreByPopularity + $scoreByPreviousExperience > 0)
-		Number(doubleValue + $avgTime <= $days*Constants.AVAILABLE_MINUTES_PER_DAY ) from accumulate(
-												Location($id : id) from recommendedLocations.keySet() and 
-												TimeEstimation(locationId == $id, $time : timeInMinutes), 
+		$current : Number() from accumulate(
+												SelectedLocation($time : time), //and 
+												//TimeEstimation(locationId == $id, $time : timeInMinutes), 
+												//sum($time))
 												sum($time))
+		eval(($current.doubleValue() + $avgTime) <= $days*Constants.AVAILABLE_MINUTES_PER_DAY)
 	then
-		System.out.println("Location with name: " + $l.getName() + " has been added to the recommended locations list");
+		System.out.println("Location with name: " + $l.getName() + " and score " + $typeScore * ($scoreByPopularity + $scoreByPreviousExperience) * 100 + " has been added to the recommended locations list");
+		System.out.println("days: " + $days);
+		System.out.println("avg: " + $avgTime);
+		System.out.println("minutes total: " + $days*Constants.AVAILABLE_MINUTES_PER_DAY);
+		System.out.println("current used time: " + $current);
 		recommendedLocations.put($l, $typeScore * ($scoreByPopularity + $scoreByPreviousExperience) * 100);
+		insert(new SelectedLocation($locationId, $avgTime));
 end

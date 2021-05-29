@@ -21,7 +21,7 @@ public class LocationType {
 	@Column(name = "name", nullable = false)
 	private String name;
 	
-	@ElementCollection(fetch = FetchType.LAZY)
+	@ElementCollection(fetch = FetchType.EAGER)
 	private Set<Feature> features = new HashSet<Feature>();
 	
 	public LocationType() {

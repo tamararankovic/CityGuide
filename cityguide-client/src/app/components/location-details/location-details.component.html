@@ -1,0 +1,15 @@
+<div style="margin-top: 50px; margin-left: 15%; width: 70%;" class="mat-elevation-z8">
+    <div style="margin-left: 10%; width: 80%;">
+        <h1 style="text-align: center; margin-top: 50px; margin-bottom: 20px;">{{location.name}}</h1>
+        <img mat-card-image src="assets/ns.jpg" alt="Photo of the location" style="width: 100%;">
+        <p style="margin-top: 30px;">Type: {{location.type}}</p>
+        <p>Address: {{location.address}}</p>
+        <p>Description: {{location.description}}</p>
+        <p>Average time spent in minutes: {{location.avgTimeSpent}}</p>
+        <p>Share your experience with us. How much time did you spent here (in minutes)?</p>
+        <mat-form-field>
+            <input matInput type="number" #name="ngModel" [(ngModel)]="minutes" name="time">
+        </mat-form-field>
+        <button mat-raised-button style="background-color: coral; color: white;" (click)="sendTimeEstimation()">Send</button>
+    </div>
+</div>

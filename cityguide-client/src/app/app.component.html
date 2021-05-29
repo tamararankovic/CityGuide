@@ -1,1 +1,30 @@
+<mat-toolbar style="min-width: 100%; max-width: max-content; background-color: coral; color: white;" class="mat-elevation-z8"> 
+    <span style="width: 10px;"></span>
+  
+    <button mat-icon-button routerLink="../">
+      <mat-icon>home</mat-icon>
+    </button>
+    <span font-color="white" style="margin-left: 10px;">CityGuide</span>
+    <span style="width: 20px;"></span>
+    
+    <span *ngIf="this.authService.isLoggedIn()">
+      <button mat-button routerLink="../locations/promoted">Promoted locations</button>
+      <button mat-button routerLink="../trip" *ngIf="this.authService.getRole() == 'BASIC_USER'">Plan your trip</button>
+      <button mat-button routerLink="../type" *ngIf="this.authService.getRole() == 'ADMIN'">Location types</button>
+      <button mat-button routerLink="../type/new" *ngIf="this.authService.getRole() == 'ADMIN'">New location type</button>
+      <button mat-button routerLink="../locations/new" *ngIf="this.authService.getRole() == 'ADMIN'">New location</button>
+    </span>
+
+    <span style="flex: 1 1 auto;">
+      <button style="float: right; margin-right: 15px;" mat-stroked-button routerLink="../login" *ngIf="!this.authService.isLoggedIn()">
+        Log In
+      </button>
+      <button style="float: right; margin-right: 15px;" mat-stroked-button routerLink="../register" *ngIf="!this.authService.isLoggedIn()">
+        Register
+      </button>
+      <button style="float: right;" mat-stroked-button routerLink="../" *ngIf="this.authService.isLoggedIn()" (click) = "this.authService.logOut()">
+        Log Out
+      </button>
+    </span>
+  </mat-toolbar>
 <router-outlet></router-outlet>

@@ -25,7 +25,7 @@ rule "Location gets negative points when it's disliked by the user"
 		Rating(user.id == $userId, location.id == $locationId, type == RatingType.DISLIKE, $date : lastModified)
 	then
 		long monthsPassed = ChronoUnit.MONTHS.between($date, LocalDateTime.now());
-		double score = -1 / monthsPassed + 1;
+		double score = -1 / (monthsPassed + 1);
 		System.out.println("Location with name: " + $l.getName() + " got " + score + " points based on previous experience");
 		insert(new LocationScoreByPreviousExperience($requestId, $locationId, score));
 end

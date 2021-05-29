@@ -1,0 +1,24 @@
+<div>
+    <div style="background-color: white; margin-top:100px; margin-bottom: 100px; height: 40%; margin-left: 40%; width: 20%; padding: 20px;" class="mat-elevation-z8">
+        <form (submit)="onSubmit()" #feedform="ngForm" novalidate>
+            <h2 style="text-align: center;">
+                Log in
+            </h2>
+            <div class="item1">
+              <mat-form-field style="width:100%;">
+                  <mat-label>Email</mat-label>
+                  <input matInput required id="usernameInput" #name = "ngModel" name="c1" [(ngModel)] = "email" style="height: 40%;"/>
+              </mat-form-field>
+            </div>
+            <div class="item3">
+                <mat-form-field style="width:100%;">
+                    <mat-label>Password</mat-label>
+                    <input matInput required id="passwordInput" #name2 = "ngModel" name="c2" type="password" [(ngModel)] = "password" style="height: 40%;"/>
+                </mat-form-field>
+            </div>
+            <div style="text-align: center; margin-top: 50px;">
+              <button id="loginButton" [disabled] ="name.invalid || name2.invalid" mat-raised-button type="submit" style="padding: 12px 32px; opacity: 120%; border-radius: 20%; background-color: coral; color: white;">Log in</button>
+            </div>
+        </form>
+    </div>
+</div>

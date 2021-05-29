@@ -18,8 +18,8 @@ import sbnz.app.model.Location;
 
 @Role(Role.Type.EVENT)
 @Timestamp("created")
-@Expires("3m")
-//@Expires("72h")
+//@Expires("3m")
+@Expires("72h")
 @Entity
 public class BadDay {
 
@@ -27,7 +27,7 @@ public class BadDay {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	private Location location;
 	
 	@Column(name = "created", nullable = false)

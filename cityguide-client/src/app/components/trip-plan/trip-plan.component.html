@@ -1,0 +1,37 @@
+<div style="margin-top: 100px; margin-left: 30%; width: 40%;" class="mat-elevation-z8" *ngIf="!showResults">
+    <h3 style="text-align: center;">
+        Tell us a bit more ..
+    </h3>
+    <p style="text-align: center;">
+        How long is your trip going to be (in days)?
+    </p>
+    <mat-form-field style="width: 60%; margin-left: 20%;">
+        <input matInput required type="number" name="d" #name="ngModel" [(ngModel)]="days">
+    </mat-form-field>
+    <p style="text-align: center; margin-top: 50px;">
+        What location types do you usually enjoy visiting?
+    </p>
+    <mat-selection-list #typess style="margin-left: 10%; width: 80%;">
+        <mat-list-option *ngFor="let t of types" [value]="t.id">
+          {{t.name}}
+        </mat-list-option>
+    </mat-selection-list>
+    <button mat-raised-button (click)="planTrip(typess.selectedOptions.selected)" style="background-color: coral; color: white; width: 20%; margin-left: 40%; margin-bottom: 20px; margin-top: 20px;">Plan</button>
+</div>
+
+<h1 style="margin-top: 30px; margin-bottom: 10px; text-align: center;" *ngIf="showResults">Recommended locations</h1>
+<div class="content" fxLayout="row wrap" *ngIf="showResults">
+    <div id="loc" fxFlex="25%" *ngFor ="let l of locations" style="margin: 20px">
+      <mat-card class="mat-elevation-z8" style="min-height: 200px; max-height: 200px;">
+        <mat-card-header (click)="showDetails(l.id)">
+            <mat-card-title>{{l.name}}</mat-card-title>
+            <mat-card-subtitle>{{l.type}}</mat-card-subtitle>
+            <mat-card-subtitle>{{l.address}}</mat-card-subtitle>
+        </mat-card-header>
+        <img mat-card-image src="assets/ns.jpg" alt="Photo of the location">
+        <mat-card-content>
+            {{l.likes}} likes {{l.dislikes}} dislikes
+        </mat-card-content>
+      </mat-card>
+    </div>
+</div>

@@ -8,8 +8,8 @@ import java.util.Date;
 import java.util.List;
 
 rule "promotion successful if there have been at least 4 ratings (predominantly likes) during or 24h after promotion"
-timer (expr: 60*1000 + $duration)
-//timer (expr: 24*60*60*1000 + $duration)
+//timer (expr: 60*1000 + $duration)
+timer (expr: 24*60*60*1000 + $duration)
 	when
 		$p : Promotion(processed == false, $locationId : location.id, $l : location, $duration : duration)
 		accumulate(RatingCreated(location.id == $locationId && $type: type && $rating: this &&
@@ -26,8 +26,8 @@ timer (expr: 60*1000 + $duration)
 end
 
 rule "declare promotion unsuccessful if no other rule can be activated"
-timer (expr: 60*1000 + $duration)
-//timer (expr: 24*60*60*1000 + $duration)
+//timer (expr: 60*1000 + $duration)
+timer (expr: 24*60*60*1000 + $duration)
 salience -1
 	when
 		$p : Promotion(processed == false, $l : location, $duration : duration)

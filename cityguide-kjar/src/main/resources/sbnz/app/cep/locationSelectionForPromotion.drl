@@ -24,8 +24,8 @@ no-loop
 									 				count($badDay))
 	then
 		System.out.println("Location with name: " + $l.getName() + " will be promoted for 5h " + $badDaysInLast72h);
-		insert(new Promotion($l, new Date(), 30*1000));
-		//insert(new Promotion($l, new Date(), 5*60*60*1000));
+		//insert(new Promotion($l, new Date(), 30*1000));
+		insert(new Promotion($l, new Date(), 5*60*60*1000));
 end
 
 rule "promote locations for 3h if their type was created more than 72h ago and none of its locations have ratings"

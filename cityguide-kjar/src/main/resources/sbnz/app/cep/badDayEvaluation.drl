@@ -9,13 +9,13 @@ import java.util.List;
 
 declare DailyEvaluation
 	@role(event)
-	//@expires(23h59m59s)
-	@expires(59s)
+	@expires(23h59m59s)
+	//@expires(59s)
 end
 
 rule "trigger daily evluation"
-timer (cron:0 */1 * * * ?)
-//timer (cron:0 0 0 */1 * ?)
+//timer (cron:0 */1 * * * ?)
+timer (cron:0 0 10 */1 * ?)
 	when
 	then
 		System.out.println("Daily evaluation triggered");

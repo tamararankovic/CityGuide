@@ -28,7 +28,7 @@ public class LocationTypeCreated implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
 	private LocationType locationType;
 	
 	@Column(name = "created", nullable = false)

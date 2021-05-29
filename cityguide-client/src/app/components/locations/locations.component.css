@@ -1,0 +1,29 @@
+
+#text{
+    margin-top: 15px;
+    color: rgb(102, 102, 102);
+}
+
+#name{
+    font-size: 16px;
+    padding: 10px;
+    text-align: center;
+    
+    color: rgb(231, 80, 118);
+}
+
+.content{
+    display: flex;
+    justify-content: center;
+    width: 900px;
+    margin: 0 auto;
+    padding-top: 30px;
+}
+
+.mat1{
+    width: 180px;
+    height: 200px;
+    margin: 10px;
+    padding: 10px;
+    padding-top: 25px;
+}
